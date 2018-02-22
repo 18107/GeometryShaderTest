@@ -54,11 +54,19 @@ public class Renderer {
 		
 		Camera.update();
 		
+		GL11.glRotatef(Camera.ry, 0, 1, 0);
+		GL11.glRotatef(Camera.rx, 1, 0, 0);
+		GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, matrix);
+		int view = GL20.glGetUniformLocation(program, "view");
+		GL20.glUniformMatrix4(view, false, matrix);
+		GL11.glLoadIdentity();
+		GL11.glTranslatef(-Camera.x, -Camera.y, -Camera.z);
+		
 		GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, matrix);
 		int proj = GL20.glGetUniformLocation(program, "projection");
 		GL20.glUniformMatrix4(proj, false, matrix);
 		GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, matrix);
-		int model = GL20.glGetUniformLocation(program, "modelview");
+		int model = GL20.glGetUniformLocation(program, "model");
 		GL20.glUniformMatrix4(model, false, matrix);
 		
 		GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertices.length/3);

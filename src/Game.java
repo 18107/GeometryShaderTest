@@ -9,7 +9,7 @@ public class Game {
 	
 	private void start() throws LWJGLException {
 		width = 800;
-		height = 600;
+		height = 800;
 		Display.setDisplayMode(new DisplayMode(width, height));
 		Display.setTitle("Geometry Shader Test");
 		Display.create();

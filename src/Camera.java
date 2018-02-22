@@ -1,6 +1,5 @@
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 
 public class Camera {
 
@@ -37,12 +36,8 @@ public class Camera {
 			else if (rx > 90) rx = 90;
 		}
 		
-		Camera.x += (Math.cos(Math.toRadians(ry)) * x - Math.sin(Math.toRadians(ry)) * z);
-		Camera.y += y;
-		Camera.z += (Math.cos(Math.toRadians(ry)) * z + Math.sin(Math.toRadians(ry)) * x);
-		
-		GL11.glRotatef(Camera.ry, 0, 1, 0);
-		GL11.glRotatef(Camera.rx, 1, 0, 0);
-		GL11.glTranslatef(-Camera.x, -Camera.y, -Camera.z);
+		Camera.x += 0.25f*(Math.cos(Math.toRadians(ry)) * x - Math.sin(Math.toRadians(ry)) * z);
+		Camera.y += 0.25f*y;
+		Camera.z += 0.25f*(Math.cos(Math.toRadians(ry)) * z + Math.sin(Math.toRadians(ry)) * x);
 	}
 }
