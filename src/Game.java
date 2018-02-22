@@ -30,6 +30,7 @@ public class Game {
 	}
 	
 	private void end() {
+		Renderer.end();
 		shaders.end();
 		Display.destroy();
 	}
