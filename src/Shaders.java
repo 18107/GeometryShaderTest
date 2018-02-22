@@ -3,7 +3,7 @@ import org.lwjgl.opengl.GL32;
 
 public class Shaders {
 	
-	private String vertexString = "#version 130\n" + 
+	public static final String vertex1 = "#version 130\n" + 
 			"\n" + 
 			"out vec4 defaultColor;\n" + 
 			"\n" + 
@@ -12,7 +12,7 @@ public class Shaders {
 			"  defaultColor = vec4(0.7, 0.2, 0.2, 0);\n" + 
 			"}";
 	
-	private String geometryString = "#version 410 compatibility\n" + 
+	public static final String geometry1 = "#version 410 compatibility\n" + 
 			"\n" + 
 			"layout(triangles) in;\n" + 
 			"layout (triangle_strip, max_vertices=18) out;\n" + 
@@ -53,7 +53,7 @@ public class Shaders {
 			"}\n" + 
 			"";
 	
-	private String fragmentString = "#version 130\n" + 
+	public static final String fragment1 = "#version 130\n" + 
 			"\n" + 
 			"in vec4 color;\n" + 
 			"\n" + 
@@ -61,15 +61,47 @@ public class Shaders {
 			"    gl_FragColor = color;\n" + 
 			"}";
 	
+	public static final String vertex2 = "#version 130\n" + 
+			"\n" + 
+			"void main(void) {\n" + 
+			"  gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;\n" + 
+			"}";
+	
+	public static final String fragment2 = "#version 130\n" + 
+			"\n" + 
+			"void main(void) {\n" + 
+			"  gl_FragColor = vec4(0,1,0,1);\n" + 
+			"}";
+	
 	private int program;
 	private int vertexShader;
 	private int geometryShader;
 	private int fragmentShader;
 	
-	public void init() {
-		vertexShader = createShader(vertexString, GL20.GL_VERTEX_SHADER);
-		geometryShader = createShader(geometryString, GL32.GL_GEOMETRY_SHADER);
-		fragmentShader = createShader(fragmentString, GL20.GL_FRAGMENT_SHADER);
+	public Shaders(String vertex, String fragment) {
+		vertexShader = createShader(vertex, GL20.GL_VERTEX_SHADER);
+		geometryShader = 0;
+		fragmentShader = createShader(fragment, GL20.GL_FRAGMENT_SHADER);
+		
+		if (vertexShader == 0 || fragmentShader == 0) {
+			throw new RuntimeException("Shader not created.");
+		}
+		
+		program = GL20.glCreateProgram();
+		
+		if (program == 0) {
+			throw new RuntimeException("Program not created.");
+		}
+		
+		GL20.glAttachShader(program, vertexShader);
+		GL20.glAttachShader(program, fragmentShader);
+		GL20.glLinkProgram(program);
+	}
+	
+	public Shaders(String vertex, String geometry, String fragment) {
+		vertexShader = createShader(vertex, GL20.GL_VERTEX_SHADER);
+		geometryShader = createShader(geometry, GL32.GL_GEOMETRY_SHADER);
+		fragmentShader = createShader(fragment, GL20.GL_FRAGMENT_SHADER);
 		
 		if (vertexShader == 0 || fragmentShader == 0 || geometryShader == 0) {
 			throw new RuntimeException("Shader not created.");

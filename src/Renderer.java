@@ -43,16 +43,21 @@ public class Renderer {
 		matrix = BufferUtils.createFloatBuffer(16);
 	}
 	
-	public static void render(int program) {
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+	public static void render(int program1, int program2) {
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
 		GL11.glLoadIdentity();
 		
+		Camera.update();
+		
+		renderPass1(program1);
+		renderPass2(program2);
+	}
+	
+	private static void renderPass1(int program) {
 		GL20.glUseProgram(program);
 		
 		GL30.glBindVertexArray(vaoId);
 		GL20.glEnableVertexAttribArray(0);
-		
-		Camera.update();
 		
 		GL11.glRotatef(Camera.ry, 0, 1, 0);
 		GL11.glRotatef(Camera.rx, 1, 0, 0);
@@ -73,6 +78,29 @@ public class Renderer {
 		
 		GL20.glDisableVertexAttribArray(0);
 		GL30.glBindVertexArray(0);
+		
+		GL20.glUseProgram(0);
+	}
+	
+	private static void renderPass2(int program) {
+		GL20.glUseProgram(program);
+		
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glPushMatrix();
+		GL11.glLoadIdentity();
+		GL11.glOrtho(-1, 1, -1, 1, -1, 1);
+		
+		GL11.glBegin(GL11.GL_QUADS);
+		{
+			GL11.glVertex2f(0, 0);
+			GL11.glVertex2f(1, 0);
+			GL11.glVertex2f(1, 1);
+			GL11.glVertex2f(0, 1);
+		}
+		GL11.glEnd();
+		
+		GL11.glPopMatrix();
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		
 		GL20.glUseProgram(0);
 	}

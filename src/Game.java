@@ -5,7 +5,7 @@ import org.lwjgl.opengl.DisplayMode;
 public class Game {
 	
 	public static int width, height;
-	public Shaders shaders;
+	public Shaders shaders1, shaders2;
 	
 	private void start() throws LWJGLException {
 		width = 800;
@@ -14,15 +14,15 @@ public class Game {
 		Display.setTitle("Geometry Shader Test");
 		Display.create();
 		
+		shaders1 = new Shaders(Shaders.vertex1, Shaders.geometry1, Shaders.fragment1);
+		shaders2 = new Shaders(Shaders.vertex2, Shaders.fragment2);
 		Renderer.init();
-		shaders = new Shaders();
-		shaders.init();
 	}
 	
 	private void run() {
 		
 		while (!Display.isCloseRequested()) {
-			Renderer.render(shaders.getProgram());
+			Renderer.render(shaders1.getProgram(), shaders2.getProgram());
 			
 			Display.update();
 			Display.sync(60);
@@ -31,7 +31,10 @@ public class Game {
 	
 	private void end() {
 		Renderer.end();
-		shaders.end();
+		if (shaders1 != null)
+			shaders1.end();
+		if (shaders2 != null)
+			shaders2.end();
 		Display.destroy();
 	}
 
