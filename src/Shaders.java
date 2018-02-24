@@ -63,16 +63,22 @@ public class Shaders {
 	
 	public static final String vertex2 = "#version 130\n" + 
 			"\n" + 
+			"out vec2 texcoord;\n" + 
+			"\n" + 
 			"void main(void) {\n" + 
 			"  gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;\n" + 
+			"\n" + 
+			"  texcoord = gl_Position.xy/2+0.5;\n" + 
 			"}";
 	
 	public static final String fragment2 = "#version 130\n" + 
 			"\n" + 
+			"in vec2 texcoord;\n" + 
+			"\n" + 
 			"uniform sampler2D tex;\n" + 
 			"\n" + 
 			"void main(void) {\n" + 
-			"  gl_FragColor = texture(tex, gl_Texcoord[0].xy);\n" + 
+			"  gl_FragColor = texture(tex, texcoord);\n" + 
 			"}";
 	
 	private int program;
