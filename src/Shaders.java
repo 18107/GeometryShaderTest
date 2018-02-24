@@ -69,8 +69,10 @@ public class Shaders {
 	
 	public static final String fragment2 = "#version 130\n" + 
 			"\n" + 
+			"uniform sampler2D tex;\n" + 
+			"\n" + 
 			"void main(void) {\n" + 
-			"  gl_FragColor = vec4(0,1,0,1);\n" + 
+			"  gl_FragColor = texture(tex, gl_Texcoord[0].xy);\n" + 
 			"}";
 	
 	private int program;

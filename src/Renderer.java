@@ -1,7 +1,9 @@
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
@@ -12,6 +14,9 @@ public class Renderer {
 	private static FloatBuffer matrix;
 	private static int vaoId;
 	private static int vboId;
+	private static int fboId;
+	private static int texId;
+	private static int depId;
 	
 	private static float[] vertices = {
 			-1,-1,-10,
@@ -20,6 +25,21 @@ public class Renderer {
 	};
 
 	public static void init() {
+		fboId = GL30.glGenFramebuffers();
+		texId = GL11.glGenTextures();
+		depId = GL30.glGenRenderbuffers();
+		
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fboId);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texId);
+		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, Game.width, Game.height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
+		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, texId, 0);
+		
+		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, depId);
+		GL30.glRenderbufferStorage(GL30.GL_RENDERBUFFER, GL14.GL_DEPTH_COMPONENT24, Game.width, Game.height);
+		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER,GL30.GL_DEPTH_ATTACHMENT,GL30.GL_RENDERBUFFER, depId);
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+		
 		GL11.glViewport(0, 0, Game.width, Game.height);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
@@ -44,9 +64,6 @@ public class Renderer {
 	}
 	
 	public static void render(int program1, int program2) {
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-		GL11.glLoadIdentity();
-		
 		Camera.update();
 		
 		renderPass1(program1);
@@ -55,6 +72,10 @@ public class Renderer {
 	
 	private static void renderPass1(int program) {
 		GL20.glUseProgram(program);
+		
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fboId);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+		GL11.glLoadIdentity();
 		
 		GL30.glBindVertexArray(vaoId);
 		GL20.glEnableVertexAttribArray(0);
@@ -79,28 +100,44 @@ public class Renderer {
 		GL20.glDisableVertexAttribArray(0);
 		GL30.glBindVertexArray(0);
 		
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
+		
 		GL20.glUseProgram(0);
 	}
 	
 	private static void renderPass2(int program) {
 		GL20.glUseProgram(program);
 		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texId);
+		
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+		GL11.glLoadIdentity();
+		
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glPushMatrix();
 		GL11.glLoadIdentity();
-		GL11.glOrtho(-1, 1, -1, 1, -1, 1);
+		GL11.glOrtho(0, 1, 0, 1, -1, 1);
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		
 		GL11.glBegin(GL11.GL_QUADS);
 		{
+			GL11.glTexCoord2f(0, 0);
 			GL11.glVertex2f(0, 0);
+			GL11.glTexCoord2f(1, 0);
 			GL11.glVertex2f(1, 0);
+			GL11.glTexCoord2f(1, 1);
 			GL11.glVertex2f(1, 1);
+			GL11.glTexCoord2f(0, 1);
 			GL11.glVertex2f(0, 1);
 		}
 		GL11.glEnd();
 		
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glPopMatrix();
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		
 		GL20.glUseProgram(0);
 	}
@@ -113,5 +150,9 @@ public class Renderer {
 		
 		GL30.glBindVertexArray(0);
 		GL30.glDeleteVertexArrays(vaoId);
+		
+		GL30.glDeleteRenderbuffers(depId);
+		GL11.glDeleteTextures(texId);
+		GL30.glDeleteFramebuffers(fboId);
 	}
 }
