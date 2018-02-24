@@ -34,12 +34,12 @@ public class Shaders {
 			"  rotation[4] = mat4(-1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1);//back\n" + 
 			"  rotation[5] = mat4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);//front\n" + 
 			"  vec4 colors[6];\n" + 
-			"  colors[0] = vec4(0,0,1,0);\n" + 
-			"  colors[1] = vec4(0,1,1,0);\n" + 
-			"  colors[2] = vec4(1,1,1,0);\n" + 
-			"  colors[3] = vec4(1,1,0,0);\n" + 
-			"  colors[4] = vec4(0,1,0,0);\n" + 
-			"  colors[5] = vec4(1,0,0,0);\n" + 
+			"  colors[0] = vec4(defaultColor[0].rgb,0);\n" + 
+			"  colors[1] = vec4(defaultColor[0].rgb,0.1);\n" + 
+			"  colors[2] = vec4(defaultColor[0].rgb,0.2);\n" + 
+			"  colors[3] = vec4(defaultColor[0].rgb,0.3);\n" + 
+			"  colors[4] = vec4(defaultColor[0].rgb,0.4);\n" + 
+			"  colors[5] = vec4(defaultColor[0].rgb,0.5);\n" + 
 			"\n" + 
 			"  for (int a = 0; a < 6; a++) {\n" + 
 			"    for (int i = 0; i < gl_in.length(); i++) {\n" + 
@@ -50,18 +50,17 @@ public class Shaders {
 			"    }\n" + 
 			"    EndPrimitive();\n" + 
 			"  }\n" + 
-			"}\n" + 
-			"";
+			"}";
 	
 	public static final String fragment1 = "#version 130\n" + 
 			"\n" + 
 			"in vec4 color;\n" + 
 			"\n" + 
 			"void main(){\n" + 
-			"    gl_FragColor = color;\n" + 
+			"    gl_FragData[0] = color;\n" + 
 			"}";
 	
-	public static final String vertex2 = "#version 130\n" + 
+	public static final String quad = "#version 130\n" + 
 			"\n" + 
 			"out vec2 texcoord;\n" + 
 			"\n" + 
@@ -71,14 +70,51 @@ public class Shaders {
 			"  texcoord = gl_Position.xy/2+0.5;\n" + 
 			"}";
 	
-	public static final String fragment2 = "#version 130\n" + 
+	public static final String cubic = "#version 130\n" + 
 			"\n" + 
 			"in vec2 texcoord;\n" + 
 			"\n" + 
 			"uniform sampler2D tex;\n" + 
 			"\n" + 
 			"void main(void) {\n" + 
-			"  gl_FragColor = texture(tex, texcoord);\n" + 
+			"  vec4 color = vec4(0,0,0,0);\n" + 
+			"  if (texcoord.y >= 1.0/3 && texcoord.y < 2.0/3) {\n" + 
+			"    if (texcoord.x < 0.25) {\n" + 
+			"      color = texture(tex, vec2(texcoord.x*4, texcoord.y*3-1));\n" + 
+			"      if (color.a < 0.05) {\n" + 
+			"        gl_FragColor = color;\n" + 
+			"      }\n" + 
+			"    } else if (texcoord.x < 0.5) {\n" + 
+			"      color = texture(tex, vec2(texcoord.x*4-1, texcoord.y*3-1));\n" + 
+			"      if (color.a > 0.45) {\n" + 
+			"        gl_FragColor = color;\n" + 
+			"      }\n" + 
+			"    } else if (texcoord.x < 0.75) {\n" + 
+			"      color = texture(tex, vec2(texcoord.x*4-2, texcoord.y*3-1));\n" + 
+			"      if (color.a > 0.05 && color.a < 0.15) {\n" + 
+			"        gl_FragColor = color;\n" + 
+			"      }\n" + 
+			"    } else {\n" + 
+			"      color = texture(tex, vec2(texcoord.x*4-3, texcoord.y*3-1));\n" + 
+			"      if (color.a > 0.35 && color.a < 0.45) {\n" + 
+			"        gl_FragColor = color;\n" + 
+			"      }\n" + 
+			"    }\n" + 
+			"  } else if (texcoord.x >= 0.25 && texcoord.x < 0.5) {\n" + 
+			"    if (texcoord.y < 1.0/3) {\n" + 
+			"      color = texture(tex, vec2(texcoord.x*4-1, texcoord.y*3));\n" + 
+			"      if (color.a > 0.15 && color.a < 0.25) {\n" + 
+			"        gl_FragColor = color;\n" + 
+			"      }\n" + 
+			"    } else if (texcoord.y >= 2.0/3) {\n" + 
+			"      color = texture(tex, vec2(texcoord.x*4-1, texcoord.y*3-2));\n" + 
+			"      if (color.a > 0.25 && color.a < 0.35) {\n" + 
+			"        gl_FragColor = color;\n" + 
+			"      }\n" + 
+			"    }\n" + 
+			"  } else {\n" + 
+			"    gl_FragColor = vec4(0.3,0.3,0.3,0);\n" + 
+			"  }\n" + 
 			"}";
 	
 	private int program;

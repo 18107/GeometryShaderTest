@@ -3,5 +3,5 @@
 in vec4 color;
 
 void main(){
-    gl_FragColor = color;
+    gl_FragData[0] = color;
 }

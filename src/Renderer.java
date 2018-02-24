@@ -1,5 +1,6 @@
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -21,7 +22,10 @@ public class Renderer {
 	private static float[] vertices = {
 			-1,-1,-10,
 			1,-1,-10,
-			1,1,-10
+			1,1,-10,
+			1,1,-10,
+			-1,1,-10,
+			-1,-1,-10
 	};
 
 	public static void init() {
@@ -31,13 +35,19 @@ public class Renderer {
 		
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fboId);
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texId);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, Game.width, Game.height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
 		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, texId, 0);
 		
 		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, depId);
 		GL30.glRenderbufferStorage(GL30.GL_RENDERBUFFER, GL14.GL_DEPTH_COMPONENT24, Game.width, Game.height);
 		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER,GL30.GL_DEPTH_ATTACHMENT,GL30.GL_RENDERBUFFER, depId);
+		
+		IntBuffer buffer = BufferUtils.createIntBuffer(2);
+		buffer.put(GL30.GL_COLOR_ATTACHMENT0);
+		buffer.put(GL30.GL_COLOR_ATTACHMENT1);
+		buffer.flip();
+		GL20.glDrawBuffers(buffer);
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 		
 		GL11.glViewport(0, 0, Game.width, Game.height);
