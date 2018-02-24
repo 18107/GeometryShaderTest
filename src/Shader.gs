@@ -20,12 +20,12 @@ out vec4 color;
   rotation[4] = mat4(-1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1);//back
   rotation[5] = mat4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);//front
   vec4 colors[6];
-  colors[0] = vec4(0,0,1,0);
-  colors[1] = vec4(0,1,1,0);
-  colors[2] = vec4(1,1,1,0);
-  colors[3] = vec4(1,1,0,0);
-  colors[4] = vec4(0,1,0,0);
-  colors[5] = vec4(1,0,0,0);
+  colors[0] = vec4(defaultColor[0].rgb,0);
+  colors[1] = vec4(defaultColor[0].rgb,0.1);
+  colors[2] = vec4(defaultColor[0].rgb,0.2);
+  colors[3] = vec4(defaultColor[0].rgb,0.3);
+  colors[4] = vec4(defaultColor[0].rgb,0.4);
+  colors[5] = vec4(defaultColor[0].rgb,0.5);
 
   for (int a = 0; a < 6; a++) {
     for (int i = 0; i < gl_in.length(); i++) {
