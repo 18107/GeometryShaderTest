@@ -4,8 +4,7 @@ layout(triangles) in;
 layout (triangle_strip, max_vertices=18) out;
 
 uniform mat4 projection;
-uniform mat4 model;
-uniform mat4 view;
+uniform mat4 modelview;
 
 in vec4 defaultColor[];
 out vec4 color;
@@ -31,7 +30,7 @@ out vec4 color;
     for (int i = 0; i < gl_in.length(); i++) {
       color = colors[a];
       vec4 vertex = gl_in[i].gl_Position;
-      gl_Position = projection*rotation[a]*view*model*vertex;
+      gl_Position = projection*rotation[a]*modelview*vertex;
       EmitVertex();
     }
     EndPrimitive();

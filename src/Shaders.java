@@ -18,8 +18,7 @@ public class Shaders {
 			"layout (triangle_strip, max_vertices=18) out;\n" + 
 			"\n" + 
 			"uniform mat4 projection;\n" + 
-			"uniform mat4 model;\n" + 
-			"uniform mat4 view;\n" + 
+			"uniform mat4 modelview;\n" + 
 			"\n" + 
 			"in vec4 defaultColor[];\n" + 
 			"out vec4 color;\n" + 
@@ -45,7 +44,7 @@ public class Shaders {
 			"    for (int i = 0; i < gl_in.length(); i++) {\n" + 
 			"      color = colors[a];\n" + 
 			"      vec4 vertex = gl_in[i].gl_Position;\n" + 
-			"      gl_Position = projection*rotation[a]*view*model*vertex;\n" + 
+			"      gl_Position = projection*rotation[a]*modelview*vertex;\n" + 
 			"      EmitVertex();\n" + 
 			"    }\n" + 
 			"    EndPrimitive();\n" + 
