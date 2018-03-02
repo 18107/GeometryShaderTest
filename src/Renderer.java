@@ -13,6 +13,7 @@ import org.lwjgl.util.glu.GLU;
 public class Renderer {
 	
 	private static FloatBuffer matrix;
+	private static FloatBuffer projectionMatrix;
 	private static int vaoId;
 	private static int vboId;
 	private static int fboId;
@@ -70,7 +71,42 @@ public class Renderer {
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		GL30.glBindVertexArray(0);
 		
+		projectionMatrix = BufferUtils.createFloatBuffer(16*6);
 		matrix = BufferUtils.createFloatBuffer(16);
+		FloatBuffer rotation[] = new FloatBuffer[6];
+		rotation[0] = BufferUtils.createFloatBuffer(16);
+		rotation[0].put(new float[] {0,0,1,0, 0,1,0,0, -1,0,0,0, 0,0,0,1}); //right
+		rotation[0].flip();
+		rotation[1] = BufferUtils.createFloatBuffer(16);
+		rotation[1].put(new float[] {0,0,-1,0, 0,1,0,0, 1,0,0,0, 0,0,0,1}); //left
+		rotation[1].flip();
+		rotation[2] = BufferUtils.createFloatBuffer(16);
+		rotation[2].put(new float[] {1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1}); //up
+		rotation[2].flip();
+		rotation[3] = BufferUtils.createFloatBuffer(16);
+		rotation[3].put(new float[] {1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1}); //down
+		rotation[3].flip();
+		rotation[4] = BufferUtils.createFloatBuffer(16);
+		rotation[4].put(new float[] {-1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1}); //back
+		rotation[4].flip();
+		rotation[5] = BufferUtils.createFloatBuffer(16);
+		rotation[5].put(new float[] {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1}); //front
+		rotation[5].flip();
+		
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
+		GLU.gluPerspective(90, Game.width/(float)Game.height, 0.001f, 1000f);
+		for (int i = 0; i < 6; i++) {
+			GL11.glPushMatrix();
+			GL11.glMultMatrix(rotation[i]);
+			GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, matrix);
+			projectionMatrix.put(matrix);
+			matrix.flip();
+			GL11.glPopMatrix();
+		}
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		
+		projectionMatrix.flip();
 	}
 	
 	public static void render(int program1, int program2) {
@@ -96,9 +132,8 @@ public class Renderer {
 		GL11.glRotatef(Camera.rx, 1, 0, 0);
 		GL11.glTranslatef(-Camera.x, -Camera.y, -Camera.z);
 		
-		GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, matrix);
 		int projection = GL20.glGetUniformLocation(program, "projection");
-		GL20.glUniformMatrix4(projection, false, matrix);
+		GL20.glUniformMatrix4(projection, false, projectionMatrix);
 		GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, matrix);
 		int modelview = GL20.glGetUniformLocation(program, "modelview");
 		GL20.glUniformMatrix4(modelview, false, matrix);

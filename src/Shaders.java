@@ -12,12 +12,12 @@ public class Shaders {
 			"  defaultColor = vec4(0.7, 0.2, 0.2, 0);\n" + 
 			"}";
 	
-	public static final String geometry1 = "#version 410 compatibility\n" + 
+	public static final String geometry1 = "#version 410\n" + 
 			"\n" + 
 			"layout(triangles) in;\n" + 
 			"layout (triangle_strip, max_vertices=18) out;\n" + 
 			"\n" + 
-			"uniform mat4 projection;\n" + 
+			"uniform mat4 projection[6];\n" + 
 			"uniform mat4 modelview;\n" + 
 			"\n" + 
 			"in vec4 defaultColor[];\n" + 
@@ -25,26 +25,19 @@ public class Shaders {
 			"\n" + 
 			" void main()\n" + 
 			"{\n" + 
-			"  mat4 rotation[6]; //+X-X+Y-Y+Z-Z\n" + 
-			"  rotation[0] = mat4(0,0,1,0, 0,1,0,0, -1,0,0,0, 0,0,0,1);//right\n" + 
-			"  rotation[1] = mat4(0,0,-1,0, 0,1,0,0, 1,0,0,0, 0,0,0,1);//left\n" + 
-			"  rotation[2] = mat4(1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1);//up\n" + 
-			"  rotation[3] = mat4(1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1);//down\n" + 
-			"  rotation[4] = mat4(-1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1);//back\n" + 
-			"  rotation[5] = mat4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);//front\n" + 
 			"  vec4 colors[6];\n" + 
-			"  colors[0] = vec4(defaultColor[0].rgb,0);\n" + 
-			"  colors[1] = vec4(defaultColor[0].rgb,0.1);\n" + 
-			"  colors[2] = vec4(defaultColor[0].rgb,0.2);\n" + 
-			"  colors[3] = vec4(defaultColor[0].rgb,0.3);\n" + 
-			"  colors[4] = vec4(defaultColor[0].rgb,0.4);\n" + 
-			"  colors[5] = vec4(defaultColor[0].rgb,0.5);\n" + 
+			"  colors[0] = vec4(0,0,1,1);\n" + 
+			"  colors[1] = vec4(0,1,1,1);\n" + 
+			"  colors[2] = vec4(1,1,1,1);\n" + 
+			"  colors[3] = vec4(1,1,0,1);\n" + 
+			"  colors[4] = vec4(1,0,1,1);\n" + 
+			"  colors[5] = vec4(1,0,0,1);\n" + 
 			"\n" + 
 			"  for (int a = 0; a < 6; a++) {\n" + 
 			"    for (int i = 0; i < gl_in.length(); i++) {\n" + 
 			"      color = colors[a];\n" + 
 			"      vec4 vertex = gl_in[i].gl_Position;\n" + 
-			"      gl_Position = projection*rotation[a]*modelview*vertex;\n" + 
+			"      gl_Position = projection[a]*modelview*vertex;\n" + 
 			"      EmitVertex();\n" + 
 			"    }\n" + 
 			"    EndPrimitive();\n" + 
@@ -80,40 +73,24 @@ public class Shaders {
 			"  if (texcoord.y >= 1.0/3 && texcoord.y < 2.0/3) {\n" + 
 			"    if (texcoord.x < 0.25) {\n" + 
 			"      color = texture(tex, vec2(texcoord.x*4, texcoord.y*3-1));\n" + 
-			"      if (color.a < 0.05) {\n" + 
-			"        gl_FragColor = color;\n" + 
-			"      }\n" + 
 			"    } else if (texcoord.x < 0.5) {\n" + 
 			"      color = texture(tex, vec2(texcoord.x*4-1, texcoord.y*3-1));\n" + 
-			"      if (color.a > 0.45) {\n" + 
-			"        gl_FragColor = color;\n" + 
-			"      }\n" + 
 			"    } else if (texcoord.x < 0.75) {\n" + 
 			"      color = texture(tex, vec2(texcoord.x*4-2, texcoord.y*3-1));\n" + 
-			"      if (color.a > 0.05 && color.a < 0.15) {\n" + 
-			"        gl_FragColor = color;\n" + 
-			"      }\n" + 
 			"    } else {\n" + 
 			"      color = texture(tex, vec2(texcoord.x*4-3, texcoord.y*3-1));\n" + 
-			"      if (color.a > 0.35 && color.a < 0.45) {\n" + 
-			"        gl_FragColor = color;\n" + 
-			"      }\n" + 
 			"    }\n" + 
 			"  } else if (texcoord.x >= 0.25 && texcoord.x < 0.5) {\n" + 
 			"    if (texcoord.y < 1.0/3) {\n" + 
 			"      color = texture(tex, vec2(texcoord.x*4-1, texcoord.y*3));\n" + 
-			"      if (color.a > 0.15 && color.a < 0.25) {\n" + 
-			"        gl_FragColor = color;\n" + 
-			"      }\n" + 
 			"    } else if (texcoord.y >= 2.0/3) {\n" + 
 			"      color = texture(tex, vec2(texcoord.x*4-1, texcoord.y*3-2));\n" + 
-			"      if (color.a > 0.25 && color.a < 0.35) {\n" + 
-			"        gl_FragColor = color;\n" + 
-			"      }\n" + 
 			"    }\n" + 
 			"  } else {\n" + 
-			"    gl_FragColor = vec4(0.3,0.3,0.3,0);\n" + 
+			"    color = vec4(0.3,0.3,0.3,0);\n" + 
 			"  }\n" + 
+			"\n" + 
+			"  gl_FragColor = color;\n" + 
 			"}";
 	
 	private int program;
