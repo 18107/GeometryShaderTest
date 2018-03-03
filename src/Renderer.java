@@ -24,12 +24,29 @@ public class Renderer {
 	private static int depId;
 	
 	private static float[] vertices = {
-			-1,-1,-10,
-			1,-1,-10,
-			1,1,-10,
-			1,1,-10,
-			-1,1,-10,
-			-1,-1,-10
+			//front
+			-1,-1,-1,
+			-1,1,-1,
+			1,1,-1,
+			1,1,-1,
+			1,-1,-1,
+			-1,-1,-1,
+			
+			//back
+			-1,-1,1,
+			1,-1,1,
+			1,1,1,
+			1,1,1,
+			-1,1,1,
+			-1,-1,1,
+			
+			//left
+			-1,-1,-1,
+			-1,-1,1,
+			-1,1,1,
+			-1,1,1,
+			-1,1,-1,
+			-1,-1,-1
 	};
 
 	public static void init() {
@@ -73,13 +90,6 @@ public class Renderer {
 		GL20.glDrawBuffers(buffer);
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
 		
-		GL11.glViewport(0, 0, Game.width, Game.height);
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glLoadIdentity();
-		GLU.gluPerspective(90, Game.width/(float)Game.height, 0.001f, 1000f);
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glLoadIdentity();
-		
 		FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertices.length);
 		vertexBuffer.put(vertices);
 		vertexBuffer.flip();
@@ -103,10 +113,10 @@ public class Renderer {
 		rotation[1].put(new float[] {0,0,-1,0, 0,1,0,0, 1,0,0,0, 0,0,0,1}); //left
 		rotation[1].flip();
 		rotation[2] = BufferUtils.createFloatBuffer(16);
-		rotation[2].put(new float[] {1,0,0,0, 0,0,1,0, 0,-1,0,0, 0,0,0,1}); //up
+		rotation[2].put(new float[] {-1,0,0,0, 0,0,1,0, 0,1,0,0, 0,0,0,1}); //up
 		rotation[2].flip();
 		rotation[3] = BufferUtils.createFloatBuffer(16);
-		rotation[3].put(new float[] {1,0,0,0, 0,0,-1,0, 0,1,0,0, 0,0,0,1}); //down
+		rotation[3].put(new float[] {-1,0,0,0, 0,0,-1,0, 0,-1,0,0, 0,0,0,1}); //down
 		rotation[3].flip();
 		rotation[4] = BufferUtils.createFloatBuffer(16);
 		rotation[4].put(new float[] {-1,0,0,0, 0,1,0,0, 0,0,-1,0, 0,0,0,1}); //back
@@ -115,6 +125,7 @@ public class Renderer {
 		rotation[5].put(new float[] {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1}); //front
 		rotation[5].flip();
 		
+		GL11.glViewport(0, 0, Game.width, Game.height);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
 		GLU.gluPerspective(90, Game.width/(float)Game.height, 0.001f, 1000f);
@@ -129,6 +140,9 @@ public class Renderer {
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		
 		projectionMatrix.flip();
+		
+		//GL11.glEnable(GL11.GL_CULL_FACE);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
 	
 	public static void render(int program1, int program2) {
@@ -144,15 +158,15 @@ public class Renderer {
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fboId);
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glLoadIdentity();
 		
 		GL30.glBindVertexArray(vaoId);
 		GL20.glEnableVertexAttribArray(0);
 		
-		GL11.glRotatef(Camera.ry, 0, 1, 0);
-		GL11.glRotatef(Camera.rx, 1, 0, 0);
-		GL11.glTranslatef(-Camera.x, -Camera.y, -Camera.z);
+		GL11.glRotatef(-Camera.ry, 0, 1, 0);
+		GL11.glRotatef(-Camera.rx, 1, 0, 0);
+		GL11.glTranslatef(Camera.x, Camera.y, -Camera.z);
 		
 		int projection = GL20.glGetUniformLocation(program, "projection");
 		GL20.glUniformMatrix4(projection, false, projectionMatrix);
@@ -182,11 +196,11 @@ public class Renderer {
 		GL11.glOrtho(0, 1, 0, 1, -1, 1);
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		
-		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+		GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 		GL11.glLoadIdentity();
 		
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texId);
+		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texId);
 		
 		GL11.glBegin(GL11.GL_QUADS);
 		{
