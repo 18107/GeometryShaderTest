@@ -15,7 +15,7 @@ public class Game {
 		Display.create();
 		
 		shaders1 = new Shaders(Shaders.vertex1, Shaders.geometry1, Shaders.fragment1);
-		shaders2 = new Shaders(Shaders.quad, Shaders.cubic);
+		shaders2 = new Shaders(Shaders.quad, Shaders.equirectangular);
 		Renderer.init();
 	}
 	

@@ -9,7 +9,7 @@ public class Shaders {
 			"\n" + 
 			"void main(void) {\n" + 
 			"  gl_Position = gl_Vertex;\n" + 
-			"  defaultColor = vec4(0.7, 0.2, 0.2, 0);\n" + 
+			"  defaultColor = gl_Vertex/2+0.5;\n" + 
 			"}";
 	
 	public static final String geometry1 = "#version 410\n" + 
@@ -25,17 +25,10 @@ public class Shaders {
 			"\n" + 
 			" void main()\n" + 
 			"{\n" + 
-			"  vec4 colors[6];\n" + 
-			"  colors[0] = vec4(0,0,1,1);\n" + 
-			"  colors[1] = vec4(0,1,1,1);\n" + 
-			"  colors[2] = vec4(1,1,1,1);\n" + 
-			"  colors[3] = vec4(1,1,0,1);\n" + 
-			"  colors[4] = vec4(1,0,1,1);\n" + 
-			"  colors[5] = vec4(1,0,0,1);\n" + 
-			"\n" + 
 			"  for (int a = 0; a < 6; a++) {\n" + 
 			"    for (int i = 0; i < gl_in.length(); i++) {\n" + 
-			"      color = colors[a];\n" + 
+			"      gl_Layer = a;\n" + 
+			"      color = defaultColor[i];\n" + 
 			"      vec4 vertex = gl_in[i].gl_Position;\n" + 
 			"      gl_Position = projection[a]*modelview*vertex;\n" + 
 			"      EmitVertex();\n" + 
@@ -59,38 +52,67 @@ public class Shaders {
 			"void main(void) {\n" + 
 			"  gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;\n" + 
 			"\n" + 
-			"  texcoord = gl_Position.xy/2+0.5;\n" + 
+			"  texcoord = gl_Position.xy;\n" + 
 			"}";
 	
 	public static final String cubic = "#version 130\n" + 
 			"\n" + 
 			"in vec2 texcoord;\n" + 
 			"\n" + 
-			"uniform sampler2D tex;\n" + 
+			"uniform samplerCube tex;\n" + 
 			"\n" + 
 			"void main(void) {\n" + 
 			"  vec4 color = vec4(0,0,0,0);\n" + 
-			"  if (texcoord.y >= 1.0/3 && texcoord.y < 2.0/3) {\n" + 
-			"    if (texcoord.x < 0.25) {\n" + 
-			"      color = texture(tex, vec2(texcoord.x*4, texcoord.y*3-1));\n" + 
+			"  if (texcoord.y >= -1.0/3 && texcoord.y < 1.0/3) {\n" + 
+			"    if (texcoord.x < -0.5) {\n" + 
+			"      color = texture(tex, vec3(1, -texcoord.y*3, -texcoord.x*4-3));\n" + 
+			"    } else if (texcoord.x < 0) {\n" + 
+			"      color = texture(tex, vec3(-texcoord.x*4-1, -texcoord.y*3, -1));\n" + 
 			"    } else if (texcoord.x < 0.5) {\n" + 
-			"      color = texture(tex, vec2(texcoord.x*4-1, texcoord.y*3-1));\n" + 
-			"    } else if (texcoord.x < 0.75) {\n" + 
-			"      color = texture(tex, vec2(texcoord.x*4-2, texcoord.y*3-1));\n" + 
+			"      color = texture(tex, vec3(-1, -texcoord.y*3, texcoord.x*4-1));\n" + 
 			"    } else {\n" + 
-			"      color = texture(tex, vec2(texcoord.x*4-3, texcoord.y*3-1));\n" + 
+			"      color = texture(tex, vec3(texcoord.x*4-3, -texcoord.y*3, 1));\n" + 
 			"    }\n" + 
-			"  } else if (texcoord.x >= 0.25 && texcoord.x < 0.5) {\n" + 
-			"    if (texcoord.y < 1.0/3) {\n" + 
-			"      color = texture(tex, vec2(texcoord.x*4-1, texcoord.y*3));\n" + 
-			"    } else if (texcoord.y >= 2.0/3) {\n" + 
-			"      color = texture(tex, vec2(texcoord.x*4-1, texcoord.y*3-2));\n" + 
+			"  } else if (texcoord.x >= -0.5 && texcoord.x < 0) {\n" + 
+			"    if (texcoord.y < -1.0/3) {\n" + 
+			"      color = texture(tex, vec3(-texcoord.x*4-1, 1, -texcoord.y*3-2));\n" + 
+			"    } else if (texcoord.y >= 1.0/3) {\n" + 
+			"      color = texture(tex, vec3(-texcoord.x*4-1, -1, texcoord.y*3-2));\n" + 
 			"    }\n" + 
 			"  } else {\n" + 
 			"    color = vec4(0.3,0.3,0.3,0);\n" + 
 			"  }\n" + 
 			"\n" + 
 			"  gl_FragColor = color;\n" + 
+			"}";
+	
+	public static final String equirectangular = "#version 130\n" + 
+			"\n" + 
+			"#define PI 3.14159265\n" + 
+			"\n" + 
+			"in vec2 texcoord;\n" + 
+			"\n" + 
+			"uniform samplerCube tex;\n" + 
+			"\n" + 
+			"vec3 rotate(vec3 ray, vec2 angle) {\n" + 
+			"\n" + 
+			"  //rotate y\\n\n" + 
+			"  float y = -sin(angle.y)*ray.z;\n" + 
+			"  float z = cos(angle.y)*ray.z;\n" + 
+			"  ray.y = y;\n" + 
+			"  ray.z = z;\n" + 
+			"\n" + 
+			"  //rotate x\\n\n" + 
+			"  float x = -sin(angle.x)*ray.z;\n" + 
+			"  z = cos(angle.x)*ray.z;\n" + 
+			"  ray.x = x;\n" + 
+			"  ray.z = z;\n" + 
+			"\n" + 
+			"  return ray;\n" + 
+			"}\n" + 
+			"\n" + 
+			"void main(void) {\n" + 
+			"  gl_FragColor = texture(tex, rotate(vec3(0,0,-1), vec2(-texcoord.x*PI, -texcoord.y*PI/2)));\n" + 
 			"}";
 	
 	private int program;

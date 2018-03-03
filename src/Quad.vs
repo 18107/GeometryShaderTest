@@ -5,5 +5,5 @@ out vec2 texcoord;
 void main(void) {
   gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;
 
-  texcoord = gl_Position.xy/2+0.5;
+  texcoord = gl_Position.xy;
 }
