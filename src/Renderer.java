@@ -4,10 +4,13 @@ import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL32;
 import org.lwjgl.util.glu.GLU;
 
 public class Renderer {
@@ -32,17 +35,36 @@ public class Renderer {
 	public static void init() {
 		fboId = GL30.glGenFramebuffers();
 		texId = GL11.glGenTextures();
-		depId = GL30.glGenRenderbuffers();
+		depId = GL11.glGenTextures();
 		
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fboId);
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, texId);
-		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-		GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, Game.width, Game.height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
-		GL30.glFramebufferTexture2D(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, GL11.GL_TEXTURE_2D, texId, 0);
+		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texId);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL12.GL_TEXTURE_WRAP_R, GL12.GL_CLAMP_TO_EDGE);
+		for (int face = 0; face < 6; face++) {
+			GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0,
+					GL30.GL_RGBA32F, Game.width, Game.height, 0,
+					GL11.GL_RGBA, GL11.GL_FLOAT, (ByteBuffer)null);
+		}
+		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, texId, 0);
 		
-		GL30.glBindRenderbuffer(GL30.GL_RENDERBUFFER, depId);
-		GL30.glRenderbufferStorage(GL30.GL_RENDERBUFFER, GL14.GL_DEPTH_COMPONENT24, Game.width, Game.height);
-		GL30.glFramebufferRenderbuffer(GL30.GL_FRAMEBUFFER,GL30.GL_DEPTH_ATTACHMENT,GL30.GL_RENDERBUFFER, depId);
+		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, depId);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL12.GL_TEXTURE_WRAP_R, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL14.GL_TEXTURE_COMPARE_MODE, GL30.GL_COMPARE_REF_TO_TEXTURE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL14.GL_TEXTURE_COMPARE_FUNC, GL11.GL_GREATER);
+		for (int face = 0; face < 6; face++) {
+			GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0,
+					GL14.GL_DEPTH_COMPONENT24, Game.width, Game.height, 0,
+					GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, (ByteBuffer)null);
+		}
+		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, depId, 0);
 		
 		IntBuffer buffer = BufferUtils.createIntBuffer(2);
 		buffer.put(GL30.GL_COLOR_ATTACHMENT0);
@@ -197,7 +219,7 @@ public class Renderer {
 		GL30.glBindVertexArray(0);
 		GL30.glDeleteVertexArrays(vaoId);
 		
-		GL30.glDeleteRenderbuffers(depId);
+		GL11.glDeleteTextures(depId);
 		GL11.glDeleteTextures(texId);
 		GL30.glDeleteFramebuffers(fboId);
 	}
