@@ -46,6 +46,30 @@ public class Renderer {
 			-1,1,1,
 			-1,1,1,
 			-1,1,-1,
+			-1,-1,-1,
+			
+			//right
+			1,-1,1,
+			1,-1,-1,
+			1,1,-1,
+			1,1,-1,
+			1,1,1,
+			1,-1,1,
+			
+			//top
+			-1,1,-1,
+			-1,1,1,
+			1,1,1,
+			1,1,1,
+			1,1,-1,
+			-1,1,-1,
+			
+			//bottom
+			-1,-1,-1,
+			1,-1,-1,
+			1,-1,1,
+			1,-1,1,
+			-1,-1,1,
 			-1,-1,-1
 	};
 
@@ -141,7 +165,7 @@ public class Renderer {
 		
 		projectionMatrix.flip();
 		
-		//GL11.glEnable(GL11.GL_CULL_FACE);
+		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 	}
 	
@@ -164,9 +188,9 @@ public class Renderer {
 		GL30.glBindVertexArray(vaoId);
 		GL20.glEnableVertexAttribArray(0);
 		
-		GL11.glRotatef(-Camera.ry, 0, 1, 0);
-		GL11.glRotatef(-Camera.rx, 1, 0, 0);
-		GL11.glTranslatef(Camera.x, Camera.y, -Camera.z);
+		GL11.glRotatef(Camera.rx, 1, 0, 0);
+		GL11.glRotatef(Camera.ry, 0, 1, 0);
+		GL11.glTranslatef(-Camera.x, -Camera.y, -Camera.z);
 		
 		int projection = GL20.glGetUniformLocation(program, "projection");
 		GL20.glUniformMatrix4(projection, false, projectionMatrix);

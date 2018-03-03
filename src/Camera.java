@@ -3,7 +3,11 @@ import org.lwjgl.input.Mouse;
 
 public class Camera {
 
-	public static float x, y, z, rx, ry;
+	public static float x;
+	public static float y;
+	public static float z = 2;
+	public static float rx;
+	public static float ry;
 	
 	public static void update() {
 		while(Keyboard.next()) {

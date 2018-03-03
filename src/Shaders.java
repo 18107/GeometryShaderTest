@@ -55,7 +55,7 @@ public class Shaders {
 			"  texcoord = gl_Position.xy;\n" + 
 			"}";
 	
-	public static final String cubic = "#version 130\n" + //TODO
+	public static final String cubic = "#version 130\n" + 
 			"\n" + 
 			"in vec2 texcoord;\n" + 
 			"\n" + 
@@ -65,19 +65,19 @@ public class Shaders {
 			"  vec4 color = vec4(0,0,0,0);\n" + 
 			"  if (texcoord.y >= -1.0/3 && texcoord.y < 1.0/3) {\n" + 
 			"    if (texcoord.x < -0.5) {\n" + 
-			"      color = texture(tex, vec3(-1, -texcoord.y*3, texcoord.x*4+3));\n" + 
+			"      color = texture(tex, vec3(1, -texcoord.y*3, -texcoord.x*4-3));\n" + 
 			"    } else if (texcoord.x < 0) {\n" + 
 			"      color = texture(tex, vec3(-texcoord.x*4-1, -texcoord.y*3, -1));\n" + 
 			"    } else if (texcoord.x < 0.5) {\n" + 
-			"      color = texture(tex, vec3(1, -texcoord.y*3, -texcoord.x*4+1));\n" + 
+			"      color = texture(tex, vec3(-1, -texcoord.y*3, texcoord.x*4-1));\n" + 
 			"    } else {\n" + 
-			"      color = texture(tex, vec3(texcoord.x, texcoord.y, 1));\n" + 
+			"      color = texture(tex, vec3(texcoord.x*4-3, -texcoord.y*3, 1));\n" + 
 			"    }\n" + 
 			"  } else if (texcoord.x >= -0.5 && texcoord.x < 0) {\n" + 
 			"    if (texcoord.y < -1.0/3) {\n" + 
-			"      color = texture(tex, vec3(texcoord.x, -1, texcoord.y));\n" + 
-			"    } else if (texcoord.y >= 2.0/3) {\n" + 
-			"      color = texture(tex, vec3(texcoord.x, 1, texcoord.y));\n" + 
+			"      color = texture(tex, vec3(-texcoord.x*4-1, 1, -texcoord.y*3-2));\n" + 
+			"    } else if (texcoord.y >= 1.0/3) {\n" + 
+			"      color = texture(tex, vec3(-texcoord.x*4-1, -1, texcoord.y*3-2));\n" + 
 			"    }\n" + 
 			"  } else {\n" + 
 			"    color = vec4(0.3,0.3,0.3,0);\n" + 
@@ -112,7 +112,7 @@ public class Shaders {
 			"}\n" + 
 			"\n" + 
 			"void main(void) {\n" + 
-			"  gl_FragColor = texture(tex, rotate(vec3(0,0,-1), vec2(texcoord.x*PI, texcoord.y*PI/2)));\n" + 
+			"  gl_FragColor = texture(tex, rotate(vec3(0,0,-1), vec2(-texcoord.x*PI, -texcoord.y*PI/2)));\n" + 
 			"}";
 	
 	private int program;

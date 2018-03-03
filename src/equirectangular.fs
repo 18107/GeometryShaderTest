@@ -24,5 +24,5 @@ vec3 rotate(vec3 ray, vec2 angle) {
 }
 
 void main(void) {
-  gl_FragColor = texture(tex, rotate(vec3(0,0,-1), vec2(texcoord.x*PI, texcoord.y*PI/2)));
+  gl_FragColor = texture(tex, rotate(vec3(0,0,-1), vec2(-texcoord.x*PI, -texcoord.y*PI/2)));
 }
