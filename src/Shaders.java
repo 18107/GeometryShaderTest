@@ -94,6 +94,10 @@ public class Shaders {
 			"\n" + 
 			"uniform samplerCube tex;\n" + 
 			"\n" + 
+			"uniform int antialiasing;\n" + 
+			"\n" + 
+			"uniform vec2 pixelOffset[16];\n" + 
+			"\n" + 
 			"vec3 rotate(vec3 ray, vec2 angle) {\n" + 
 			"\n" + 
 			"  //rotate y\\n\n" + 
@@ -112,7 +116,32 @@ public class Shaders {
 			"}\n" + 
 			"\n" + 
 			"void main(void) {\n" + 
-			"  gl_FragColor = texture(tex, rotate(vec3(0,0,-1), vec2(-texcoord.x*PI, -texcoord.y*PI/2)));\n" + 
+			"  vec4 color[16];\n" + 
+			"\n" + 
+			"  for (int loop = 0; loop < antialiasing; loop++) {\n" + 
+			"    vec3 ray = vec3(0, 0, -1);\n" + 
+			"\n" + 
+			"    ray = rotate(ray, vec2((-texcoord.x+pixelOffset[loop].x)*PI, (-texcoord.y+pixelOffset[loop].y)*PI/2)); //TODO\n" + 
+			"\n" + 
+			"    color[loop] = texture(tex, ray);\n" + 
+			"  }\n" + 
+			"\n" + 
+			"  if (antialiasing == 16) {\n" + 
+			"	  vec4 corner[4];\n" + 
+			"	  corner[0] = mix(mix(color[0], color[1], 2.0/3.0), mix(color[4], color[5], 3.0/5.0), 5.0/8.0);\n" + 
+			"	  corner[1] = mix(mix(color[3], color[2], 2.0/3.0), mix(color[7], color[6], 3.0/5.0), 5.0/8.0);\n" + 
+			"	  corner[2] = mix(mix(color[12], color[13], 2.0/3.0), mix(color[8], color[9], 3.0/5.0), 5.0/8.0);\n" + 
+			"	  corner[3] = mix(mix(color[15], color[14], 2.0/3.0), mix(color[11], color[10], 3.0/5.0), 5.0/8.0);\n" + 
+			"	  gl_FragColor = mix(mix(corner[0], corner[1], 0.5), mix(corner[2], corner[3], 0.5), 0.5);\n" + 
+			"	}\n" + 
+			"	else if (antialiasing == 4) {\n" + 
+			"		gl_FragColor = mix(mix(color[0], color[1], 0.5), mix(color[2], color[3], 0.5), 0.5);\n" + 
+			"	}\n" + 
+			"	else { //if antialiasing == 1\n" + 
+			"		gl_FragColor = color[0];\n" + 
+			"	}\n" + 
+			"\n" + 
+			"  //gl_FragColor = texture(tex, rotate(vec3(0,0,-1), vec2(-texcoord.x*PI, -texcoord.y*PI/2)));\n" + 
 			"}";
 	
 	private int program;

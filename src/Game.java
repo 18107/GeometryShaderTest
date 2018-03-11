@@ -4,14 +4,14 @@ import org.lwjgl.opengl.DisplayMode;
 
 public class Game {
 	
-	public static int width, height;
 	public Shaders shaders1, shaders2;
 	
+	public static boolean running = true;
+	
 	private void start() throws LWJGLException {
-		width = 800;
-		height = 800;
-		Display.setDisplayMode(new DisplayMode(width, height));
+		Display.setDisplayMode(new DisplayMode(1600, 800));
 		Display.setTitle("Geometry Shader Test");
+		Display.setResizable(true);
 		Display.create();
 		
 		shaders1 = new Shaders(Shaders.vertex1, Shaders.geometry1, Shaders.fragment1);
@@ -21,7 +21,10 @@ public class Game {
 	
 	private void run() {
 		
-		while (!Display.isCloseRequested()) {
+		while (!Display.isCloseRequested() && running) {
+			if (Display.wasResized()) {
+				Renderer.resize();
+			}
 			Renderer.render(shaders1.getProgram(), shaders2.getProgram());
 			
 			Display.update();

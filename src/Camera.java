@@ -1,20 +1,21 @@
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 
 public class Camera {
 
 	public static float x;
 	public static float y;
-	public static float z = 2;
+	public static float z;
 	public static float rx;
 	public static float ry;
 	
 	public static void update() {
 		while(Keyboard.next()) {
 			if(Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-				if(Keyboard.getEventKeyState()) {
+				if(!Keyboard.getEventKeyState()) {
 					Mouse.setGrabbed(!Mouse.isGrabbed());
-					Mouse.setCursorPosition(Game.width/2, Game.height/2);
+					Mouse.setCursorPosition(Display.getWidth()/2, Display.getHeight()/2);
 				}
 			}
 		}
@@ -32,7 +33,7 @@ public class Camera {
 			
 			ry += Mouse.getDX()/4;
 			rx -= Mouse.getDY()/4;
-			Mouse.setCursorPosition(Game.width/2, Game.height/2);
+			Mouse.setCursorPosition(Display.getWidth()/2, Display.getHeight()/2);
 			
 			if (ry > 360) ry -= 360;
 			else if (ry < 0) ry += 360;

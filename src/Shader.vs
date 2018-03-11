@@ -4,5 +4,5 @@ out vec4 defaultColor;
 
 void main(void) {
   gl_Position = gl_Vertex;
-  defaultColor = vec4(0.7, 0.2, 0.2, 0);
+  defaultColor = gl_Vertex/2+0.5;
 }

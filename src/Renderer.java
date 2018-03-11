@@ -3,6 +3,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL13;
@@ -22,6 +23,9 @@ public class Renderer {
 	private static int fboId;
 	private static int texId;
 	private static int depId;
+	
+	private static float resolutionModifier = 4f; //1 will do, 4 is highest quality
+	private static int antialiasing = 16;
 	
 	private static float[] vertices = {
 			//front
@@ -72,6 +76,13 @@ public class Renderer {
 			-1,-1,1,
 			-1,-1,-1
 	};
+	
+	public static void setResolutionModifier(float modifier) {
+		if (modifier != resolutionModifier) {
+			resolutionModifier = modifier;
+			resize();
+		}
+	}
 
 	public static void init() {
 		fboId = GL30.glGenFramebuffers();
@@ -87,7 +98,8 @@ public class Renderer {
 		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL12.GL_TEXTURE_WRAP_R, GL12.GL_CLAMP_TO_EDGE);
 		for (int face = 0; face < 6; face++) {
 			GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0,
-					GL30.GL_RGBA32F, Game.width, Game.height, 0,
+					GL30.GL_RGBA32F, (int) (Display.getHeight()*resolutionModifier),
+					(int) (Display.getHeight()*resolutionModifier), 0,
 					GL11.GL_RGBA, GL11.GL_FLOAT, (ByteBuffer)null);
 		}
 		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, texId, 0);
@@ -102,7 +114,8 @@ public class Renderer {
 		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL14.GL_TEXTURE_COMPARE_FUNC, GL11.GL_GREATER);
 		for (int face = 0; face < 6; face++) {
 			GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0,
-					GL14.GL_DEPTH_COMPONENT24, Game.width, Game.height, 0,
+					GL14.GL_DEPTH_COMPONENT24, (int) (Display.getHeight()*resolutionModifier),
+					(int) (Display.getHeight()*resolutionModifier), 0,
 					GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, (ByteBuffer)null);
 		}
 		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, depId, 0);
@@ -149,10 +162,11 @@ public class Renderer {
 		rotation[5].put(new float[] {1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1}); //front
 		rotation[5].flip();
 		
-		GL11.glViewport(0, 0, Game.width, Game.height);
+		GL11.glViewport(0, 0, (int) (Display.getHeight()*resolutionModifier),
+				(int) (Display.getHeight()*resolutionModifier));
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
-		GLU.gluPerspective(90, Game.width/(float)Game.height, 0.001f, 1000f);
+		GLU.gluPerspective(90, 1, 0.001f, 1000f);
 		for (int i = 0; i < 6; i++) {
 			GL11.glPushMatrix();
 			GL11.glMultMatrix(rotation[i]);
@@ -165,8 +179,47 @@ public class Renderer {
 		
 		projectionMatrix.flip();
 		
-		GL11.glEnable(GL11.GL_CULL_FACE);
+		//GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
+	}
+	
+	public static void resize() {
+		GL11.glDeleteTextures(depId);
+		GL11.glDeleteTextures(texId);
+		
+		texId = GL11.glGenTextures();
+		depId = GL11.glGenTextures();
+		
+		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fboId);
+		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texId);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL12.GL_TEXTURE_WRAP_R, GL12.GL_CLAMP_TO_EDGE);
+		for (int face = 0; face < 6; face++) {
+			GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0,
+					GL30.GL_RGBA32F, (int) (Display.getHeight()*resolutionModifier),
+					(int) (Display.getHeight()*resolutionModifier), 0,
+					GL11.GL_RGBA, GL11.GL_FLOAT, (ByteBuffer)null);
+		}
+		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_COLOR_ATTACHMENT0, texId, 0);
+		
+		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, depId);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL12.GL_TEXTURE_WRAP_R, GL12.GL_CLAMP_TO_EDGE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL14.GL_TEXTURE_COMPARE_MODE, GL30.GL_COMPARE_REF_TO_TEXTURE);
+		GL11.glTexParameteri(GL13.GL_TEXTURE_CUBE_MAP, GL14.GL_TEXTURE_COMPARE_FUNC, GL11.GL_GREATER);
+		for (int face = 0; face < 6; face++) {
+			GL11.glTexImage2D(GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0,
+					GL14.GL_DEPTH_COMPONENT24, (int) (Display.getHeight()*resolutionModifier),
+					(int) (Display.getHeight()*resolutionModifier), 0,
+					GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, (ByteBuffer)null);
+		}
+		GL32.glFramebufferTexture(GL30.GL_FRAMEBUFFER, GL30.GL_DEPTH_ATTACHMENT, depId, 0);
 	}
 	
 	public static void render(int program1, int program2) {
@@ -179,6 +232,8 @@ public class Renderer {
 	private static void renderPass1(int program) {
 		GL20.glUseProgram(program);
 		
+		GL11.glViewport(0, 0, (int) (Display.getHeight()*resolutionModifier),
+				(int) (Display.getHeight()*resolutionModifier));
 		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		
 		GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, fboId);
@@ -211,6 +266,7 @@ public class Renderer {
 	private static void renderPass2(int program) {
 		GL20.glUseProgram(program);
 		
+		GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
 		int tex = GL20.glGetUniformLocation(program, "tex");
 		GL20.glUniform1i(tex, 0);
 		
@@ -225,6 +281,38 @@ public class Renderer {
 		
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, texId);
+		
+		antialiasing = 16;
+		
+		int antialiasingUniform = GL20.glGetUniformLocation(program, "antialiasing");
+		GL20.glUniform1i(antialiasingUniform, antialiasing);
+		int pixelOffsetUniform;
+		if (antialiasing == 1) {
+			pixelOffsetUniform = GL20.glGetUniformLocation(program, "pixelOffset[0]");
+			GL20.glUniform2f(pixelOffsetUniform, 0, 0);
+		}
+		else if (antialiasing == 4) {
+			pixelOffsetUniform = GL20.glGetUniformLocation(program, "pixelOffset[0]");
+			GL20.glUniform2f(pixelOffsetUniform, -0.5f/Display.getWidth(), -0.5f/Display.getHeight());
+			pixelOffsetUniform = GL20.glGetUniformLocation(program, "pixelOffset[1]");
+			GL20.glUniform2f(pixelOffsetUniform, 0.5f/Display.getWidth(), -0.5f/Display.getHeight());
+			pixelOffsetUniform = GL20.glGetUniformLocation(program, "pixelOffset[2]");
+			GL20.glUniform2f(pixelOffsetUniform, -0.5f/Display.getWidth(), 0.5f/Display.getHeight());
+			pixelOffsetUniform = GL20.glGetUniformLocation(program, "pixelOffset[3]");
+			GL20.glUniform2f(pixelOffsetUniform, 0.5f/Display.getWidth(), 0.5f/Display.getHeight());
+		}
+		else if (antialiasing == 16) {
+			float left = (-1f+0.25f)/Display.getWidth();
+			float top = (-1f+0.25f)/Display.getHeight();
+			float right = 0.5f/Display.getWidth();
+			float down = 0.5f/Display.getHeight();
+			for (int y = 0; y < 4; y++) {
+				for (int x = 0; x < 4; x++) {
+					pixelOffsetUniform = GL20.glGetUniformLocation(program, "pixelOffset[" + (y*4+x) + "]");
+					GL20.glUniform2f(pixelOffsetUniform, left + right*x, top + down*y);
+				}
+			}
+		}
 		
 		GL11.glBegin(GL11.GL_QUADS);
 		{
@@ -249,12 +337,7 @@ public class Renderer {
 	}
 	
 	public static void end() {
-		GL20.glDisableVertexAttribArray(0);
-		
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		GL15.glDeleteBuffers(vboId);
-		
-		GL30.glBindVertexArray(0);
 		GL30.glDeleteVertexArrays(vaoId);
 		
 		GL11.glDeleteTextures(depId);
